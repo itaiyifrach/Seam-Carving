@@ -25,6 +25,7 @@ public class Main {
         {
             // read the image file
             BufferedImage image = ImageIO.read(new File(inputImageFilename));
+            //Matrix energyMatrix = getEnergyMatrix(image, energyType);
 
         }
         catch (IOException e)
@@ -33,6 +34,21 @@ public class Main {
             // re-throw if desired
         }
 
+    }
+
+    public Matrix getEnergyMatrix(BufferedImage image, int type) {
+        Matrix rgbMatrix = getRGBMatrix(image);
+        Matrix energyMatrix = getRegularEnergyMatrix(rgbMatrix);
+
+        if (type == 0) // regular energy without entropy term
+            return energyMatrix;
+        if (type == 1) { // regular energy with entropy term
+            return energyMatrix.plus(getEntropyMatrix(rgbMatrix));
+        }
+        if (type == 2) {
+            // TODO
+        }
+        return energyMatrix;
     }
 
     private Matrix getRGBMatrix(BufferedImage image) {
@@ -76,7 +92,7 @@ public class Main {
     }
 
     // regular energy matrix without entropy
-    public Matrix getRegularEnergyMatrix(Matrix rgbMatrix) {
+    private Matrix getRegularEnergyMatrix(Matrix rgbMatrix) {
         int n = rgbMatrix.getN();  // #rows
         int m = rgbMatrix.getM();   // #cols
         double neighborVal, pixelVal, sum=0;
@@ -91,10 +107,10 @@ public class Main {
             for (int j = 0; j < m; j++) {
                 neighbors = getNeighbors(rgbMatrix, i, j); // getting list of (i,j) neighbors values
                 pixelRGB = getRGBArray((int)rgbMatrix.get(i, j)); // get the rgb vals from the pixel
-                for (int k = 0; k < neighbors.size(); k++) {    // iterating over all (i,j) neighbors to calc his value
-                    pixelVal = rgbMatrix.get(neighbors.get(k)[0], neighbors.get(k)[1]);   // get the neighbor pixel value
-                    neighborRGB = getRGBArray((int)pixelVal); // get the rgb vals from the neighbor pixel
-                    neighborVal = (Math.abs(pixelRGB[0]-neighborRGB[0]) + Math.abs(pixelRGB[1]-neighborRGB[1]) + Math.abs(pixelRGB[2]-neighborRGB[2])) / 3;
+                for (int[] neighbor : neighbors) {    // iterating over all (i,j) neighbors to calc his value
+                    pixelVal = rgbMatrix.get(neighbor[0], neighbor[1]);   // get the neighbor pixel value
+                    neighborRGB = getRGBArray((int) pixelVal); // get the rgb vals from the neighbor pixel
+                    neighborVal = (Math.abs(pixelRGB[0] - neighborRGB[0]) + Math.abs(pixelRGB[1] - neighborRGB[1]) + Math.abs(pixelRGB[2] - neighborRGB[2])) / 3;
                     sum += neighborVal;
                 }
                 data[i][j] = sum / neighbors.size();    // setting (i,j) value
@@ -105,7 +121,7 @@ public class Main {
     }
 
     // entropy matrix
-    public Matrix getEntropyMatrix(Matrix rgbMatrix) {
+    private Matrix getEntropyMatrix(Matrix rgbMatrix) {
         int n = rgbMatrix.getN();  // #rows
         int m = rgbMatrix.getM();   // #cols
         Matrix greyscaleMatrix = getGreyscaleMatrix(rgbMatrix);
@@ -141,21 +157,6 @@ public class Main {
         }
 
         return sum*(-1);
-    }
-
-    public Matrix getEnergyMatrix(BufferedImage image, int type) {
-        Matrix rgbMatrix = getRGBMatrix(image);
-        Matrix energyMatrix = getRegularEnergyMatrix(rgbMatrix);
-
-        if (type == 0) // regular energy without entropy term
-            return energyMatrix;
-        if (type == 1) { // regular energy with entropy term
-            return energyMatrix.plus(getEntropyMatrix(rgbMatrix));
-        }
-        if (type == 2) {
-            // TODO
-        }
-        return energyMatrix;
     }
 
     // returns int RGB array of size 3 = {red, blue, green}
