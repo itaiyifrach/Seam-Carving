@@ -5,6 +5,7 @@ import javax.imageio.ImageIO;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 public class Main {
 
@@ -21,11 +22,22 @@ public class Main {
         int energyType = Integer.parseInt(args[4]);
         String outputImageFilename = args[5];
 
+        // get output file extension
+        String fileSuffix = "";
+        int i = outputImageFilename.lastIndexOf('.');
+        if (i > 0) {
+            fileSuffix = outputImageFilename.substring(i+1);
+        }
+
         try
         {
             // read the image file
-            BufferedImage image = ImageIO.read(new File(inputImageFilename));
-            //Matrix energyMatrix = getEnergyMatrix(image, energyType);
+            BufferedImage inImage = ImageIO.read(new File(inputImageFilename));
+//            Matrix energyMatrix = getEnergyMatrix(inImage, energyType);
+//
+//            BufferedImage outImage = convertMatrixToBufferedImage(mat);
+//            ImageIO.write(outImage, fileSuffix, new File(outputImageFilename));
+            System.out.println("end");
 
         }
         catch (IOException e)
@@ -95,7 +107,7 @@ public class Main {
     private Matrix getRegularEnergyMatrix(Matrix rgbMatrix) {
         int n = rgbMatrix.getN();  // #rows
         int m = rgbMatrix.getM();   // #cols
-        double neighborVal, pixelVal, sum=0;
+        double neighborVal, pixelVal, sum;
         int[] neighborRGB;
         int[] pixelRGB;
         List<int[]> neighbors;
@@ -105,6 +117,7 @@ public class Main {
         // getting the energy values of each pixel
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
+                sum = 0;
                 neighbors = getNeighbors(rgbMatrix, i, j); // getting list of (i,j) neighbors values
                 pixelRGB = getRGBArray((int)rgbMatrix.get(i, j)); // get the rgb vals from the pixel
                 for (int[] neighbor : neighbors) {    // iterating over all (i,j) neighbors to calc his value
@@ -177,4 +190,20 @@ public class Main {
         return grey;
     }
 
+    private BufferedImage convertMatrixToBufferedImage(Matrix rgbMatrix) {
+        int n = rgbMatrix.getN();  // #rows
+        int m = rgbMatrix.getM();   // #cols
+        BufferedImage img = new BufferedImage(n, m, TYPE_INT_ARGB);
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                int rgb = (int)rgbMatrix.get(i,j);
+                img.setRGB(i, j, rgb);
+            }
+        }
+
+        return img;
+    }
+
 }
+
