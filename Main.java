@@ -5,22 +5,24 @@ import javax.imageio.ImageIO;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length != 6) {
-            System.out.println("Number of passed arguments is not valid");
-            return;
-        }
+//        if (args.length != 6) {
+//            System.out.println("Number of passed arguments is not valid");
+//            return;
+//        }
 
         // getting all parameters
-        String inputImageFilename = args[1];
-        int cols = Integer.parseInt(args[2]);
-        int rows = Integer.parseInt(args[3]);
-        int energyType = Integer.parseInt(args[4]);
-        String outputImageFilename = args[5];
+//        String inputImageFilename = args[1];
+//        int cols = Integer.parseInt(args[2]);
+//        int rows = Integer.parseInt(args[3]);
+//        int energyType = Integer.parseInt(args[4]);
+//        String outputImageFilename = args[5];
+
+        String inputImageFilename = "halong_bay.jpg";
+        String outputImageFilename = "halong_bay_out.jpg";
 
         // get output file extension
         String fileSuffix = "";
@@ -35,8 +37,9 @@ public class Main {
             BufferedImage inImage = ImageIO.read(new File(inputImageFilename));
 //            Matrix energyMatrix = getEnergyMatrix(inImage, energyType);
 //
-//            BufferedImage outImage = convertMatrixToBufferedImage(mat);
-//            ImageIO.write(outImage, fileSuffix, new File(outputImageFilename));
+
+            BufferedImage outImage = convertMatrixToBufferedImage(getRGBMatrix(inImage));
+            ImageIO.write(outImage, fileSuffix, new File(outputImageFilename));
             System.out.println("end");
 
         }
@@ -63,14 +66,15 @@ public class Main {
         return energyMatrix;
     }
 
-    private Matrix getRGBMatrix(BufferedImage image) {
+    private static Matrix getRGBMatrix(BufferedImage image) {
         int n = image.getHeight();  // #rows
         int m = image.getWidth();   // #cols
 
         double[][] data = new double[n][m];
+
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++)
-                data[i][j] = image.getRGB(i,j);
+                data[i][j] = image.getRGB(j, i);
 
         return new Matrix(data, true);
     }
@@ -190,15 +194,15 @@ public class Main {
         return grey;
     }
 
-    private BufferedImage convertMatrixToBufferedImage(Matrix rgbMatrix) {
-        int n = rgbMatrix.getN();  // #rows
-        int m = rgbMatrix.getM();   // #cols
-        BufferedImage img = new BufferedImage(n, m, TYPE_INT_ARGB);
+    private static BufferedImage convertMatrixToBufferedImage(Matrix rgbMatrix) {
+        int n = rgbMatrix.getN();  // #rows, height of image
+        int m = rgbMatrix.getM();   // #cols, width of image
+        BufferedImage img = new BufferedImage(m, n, 1);
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
                 int rgb = (int)rgbMatrix.get(i,j);
-                img.setRGB(i, j, rgb);
+                img.setRGB(j, i, rgb);
             }
         }
 
